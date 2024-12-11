@@ -6,6 +6,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 
+# API Key from settings
 API_KEY = settings.VIRUSTOTAL_API_KEY
 
 
@@ -28,16 +29,17 @@ def map_to_tests(analysis_results):
 def scan_url(request):
     if request.method == "POST":
         try:
-           
+            # Parse the incoming request
             data = json.loads(request.body)
             target_url = data.get("url")
 
+            # Validate the target URL
             if not target_url or not re.match(r"^https?://", target_url):
                 return JsonResponse({"error": "Invalid URL format"}, status=400)
 
             print(f"Target URL Received: {target_url}")
 
-           
+            # Submit URL to VirusTotal
             virustotal_endpoint = "https://www.virustotal.com/api/v3/urls"
             headers = {"x-apikey": API_KEY}
             response = requests.post(
@@ -48,16 +50,18 @@ def scan_url(request):
                 print("VirusTotal Submission Failed:", response.json())
                 return JsonResponse({"error": response.json()}, status=response.status_code)
 
+            # Extract analysis link from the response
             result = response.json()
             print("Raw VirusTotal Response:", json.dumps(result, indent=4))
             analysis_link = result["data"]["links"]["self"]
 
+            # Poll for analysis results
             print("Starting the polling loop for VirusTotal analysis results...")
-            for attempt in range(20):  
+            for attempt in range(20):  # Retry up to 20 times
                 print(f"Polling attempt {attempt + 1}...")
 
                 try:
-                   
+                    # Make the request to the self-analysis link
                     analysis_response = requests.get(analysis_link, headers=headers)
                     print(f"Polling Response Status: {analysis_response.status_code}")
 
@@ -65,7 +69,7 @@ def scan_url(request):
                         analysis_result = analysis_response.json()
                         print("Polling Response Content:", json.dumps(analysis_result, indent=4))
 
-                        
+                        # Extract analysis results if available
                         attributes = analysis_result.get("data", {}).get("attributes", {})
                         if "last_analysis_results" in attributes:
                             print("Analysis results are available!")
@@ -73,7 +77,7 @@ def scan_url(request):
                             analysis_results = attributes.get("last_analysis_results", {})
                             detection_stats = attributes.get("last_analysis_stats", {})
 
-                           
+                            # Build the final response
                             response_data = {
                                 "target": target_url,
                                 "scanType": "Light",
@@ -86,17 +90,14 @@ def scan_url(request):
                             print("Final Backend Response:", json.dumps(response_data, indent=4))
                             return JsonResponse(response_data, status=200)
 
-                    else:
-                        print(f"Non-200 response during polling: {analysis_response.status_code}")
-                
                 except requests.exceptions.RequestException as e:
                     print(f"Error in polling request: {str(e)}")
 
                 print("No results yet. Retrying in 5 seconds...")
                 time.sleep(5)
 
-            
-            print("Analysis timed out after 10 attempts.")
+            # If no results after polling
+            print("Analysis timed out after 20 attempts.")
             return JsonResponse({"error": "Analysis timed out"}, status=504)
 
         except Exception as e:

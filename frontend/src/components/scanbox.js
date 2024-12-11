@@ -19,7 +19,7 @@ const ScanBox = () => {
   };
 
   const sanitizeUrl = (url) => {
-    // Remove extra protocol if already present
+  
     let sanitizedUrl = url.trim().replace(/^(https?:\/\/)/, ""); // Remove any existing protocol
     return `${protocol}://${sanitizedUrl}`;
   };
@@ -29,24 +29,30 @@ const ScanBox = () => {
       setError("Please enter a valid URL!");
       return;
     }
-
+  
     const sanitizedUrl = sanitizeUrl(url);
     setIsLoading(true);
     setError(null);
-
+  
     try {
-      const response = await axios.post("http://127.0.0.1:8000/api/scan-url/", {
-        url: sanitizedUrl,
+      // Call backend 
+      fetch("http://127.0.0.1:8000/api/scan-url/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: sanitizedUrl }),
+      }).catch((err) => {
+        console.error("Backend error:", err); // Log backend error if it occurs
       });
-
-      // Navigate to ResultPage with the scan_id
-      navigate("/results", { state: { scanId: response.data.scan_id, targetUrl: sanitizedUrl } });
+  
+      navigate("/results", { state: { scanId: "simulated-scan-id", targetUrl: sanitizedUrl } });
     } catch (err) {
-      setError(err.response?.data?.error || "Failed to initiate scan. Please try again.");
+      console.error("Failed to initiate scan:", err);
+      setError("An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
+  
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-6 w-full md:w-2/3 lg:w-1/2 mx-auto">
