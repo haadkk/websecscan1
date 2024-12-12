@@ -32,13 +32,13 @@ const SignIn = ({ setAuth }) => {
   };
 
   return (
-    <div className="flex flex-col items-center min-h-screen bg-gradient-to-r from-purple-600 via-blue-500 to-teal-500">
+    <div className="flex flex-col items-center min-h-screen bg-dark-blue bg-gradient-to-r from-purple-600 via-blue-500 to-teal-500">
       {/* Header */}
       <motion.h1
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
-        className="text-4xl font-bold text-white mt-10 mb-6"
+        className="text-5xl font-bold text-white mt-10 mb-6 hover:text-gray-300 transition duration-300"
       >
         WebSecScan
       </motion.h1>
@@ -80,7 +80,7 @@ const SignIn = ({ setAuth }) => {
         </div>
       </motion.form>
 
-      {/* Popup Notifications */}
+    
       {successMessage && (
         <motion.div
           initial={{ opacity: 0, y: 50 }}

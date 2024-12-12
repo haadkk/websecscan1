@@ -14,7 +14,7 @@ const R = () => {
   const scanId = location.state?.scanId;
   const targetUrl = location.state?.targetUrl;
 
-  // List of engines
+
   const engines = [
     "Artists Against 419",
     "Acronis",
@@ -45,7 +45,7 @@ const R = () => {
       return;
     }
 
-    // Simulate progress bar
+    
     const progressInterval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
@@ -56,40 +56,34 @@ const R = () => {
       });
     }, 500);
 
-    // Simulate fetching results
+    
     const fetchResults = async () => {
-      try {
-        setTimeout(() => {
-          const malicious = Math.floor(Math.random() * 3); // Malicious: 0-2
-          const harmless = Math.floor(Math.random() * 11) + 60; // Harmless: 60-70
-          const undetected = totalDetections - malicious - harmless;
+      setTimeout(() => {
+        const malicious = Math.floor(Math.random() * 3); 
+        const harmless = Math.floor(Math.random() * 11) + 60; 
+        const undetected = totalDetections - malicious - harmless;
 
-          // Generate simulated results
-          const simulatedResults = {
-            stats: {
-              malicious,
-              harmless,
-              suspicious: 0, // No suspicious results
-              undetected,
-            },
-            results: engines.reduce((acc, engine) => {
-              acc[engine] = {
-                method: "blacklist",
-                engine_name: engine,
-                category: harmless > 0 ? "harmless" : "undetected",
-                result: harmless > 0 ? "clean" : "unrated",
-              };
-              return acc;
-            }, {}),
-          };
+        const simulatedResults = {
+          stats: {
+            malicious,
+            harmless,
+            suspicious: 0, 
+            undetected,
+          },
+          results: engines.reduce((acc, engine) => {
+            acc[engine] = {
+              method: "blacklist",
+              engine_name: engine,
+              category: harmless > 0 ? "harmless" : "undetected",
+              result: harmless > 0 ? "clean" : "unrated",
+            };
+            return acc;
+          }, {}),
+        };
 
-          setScanResults(simulatedResults);
-          setStatus("completed");
-        }, 3000);
-      } catch (err) {
-        console.error("Error fetching results:", err);
-        setError("An unexpected error occurred.");
-      }
+        setScanResults(simulatedResults);
+        setStatus("completed");
+      }, 3000);
     };
 
     fetchResults();
@@ -121,7 +115,14 @@ const R = () => {
   return (
     <div className="min-h-screen bg-gray-900 text-white p-6">
       <div className="bg-gray-800 p-6 rounded-lg shadow-lg max-w-6xl mx-auto">
-        <h1 className="text-2xl font-bold mb-4">Scan Results for: {targetUrl}</h1>
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-2xl font-bold">Scan Results for: {targetUrl}</h1>
+          <button
+            className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600"
+          >
+            Download Scan Report
+          </button>
+        </div>
         <div className="bg-gray-700 p-4 rounded-lg mb-4">
           <p className="text-lg">
             Status: <span className="text-green-400">Completed</span>
@@ -155,18 +156,12 @@ const R = () => {
           {scanResults?.results ? (
             Object.entries(scanResults.results).map(([engine, result]) => (
               <div key={engine} className="mb-4 border-b border-gray-600 pb-2">
-                <p className="text-lg font-semibold text-yellow-400">
-                  {engine}
+                <p className="text-lg font-semibold text-yellow-400">{engine}</p>
+                <p>
+                  Category: <span className="text-green-400">{result.category}</span>
                 </p>
                 <p>
-                  Category:{" "}
-                  <span className="text-green-400">{result.category}</span>
-                </p>
-                <p>
-                  Detection:{" "}
-                  <span className="text-red-400">
-                    {result.result || "No detection"}
-                  </span>
+                  Detection: <span className="text-red-400">{result.result || "No detection"}</span>
                 </p>
               </div>
             ))

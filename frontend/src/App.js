@@ -69,7 +69,7 @@ function App() {
             }
           />
 
-          {/* R Page */}
+          {/* Result  Page */}
           <Route
             path="/results"
             element={

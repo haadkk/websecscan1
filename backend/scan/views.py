@@ -57,7 +57,7 @@ def scan_url(request):
 
             # Poll for analysis results
             print("Starting the polling loop for VirusTotal analysis results...")
-            for attempt in range(20):  # Retry up to 20 times
+            for attempt in range(10):  # Retry up to 20 times
                 print(f"Polling attempt {attempt + 1}...")
 
                 try:
